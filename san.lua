@@ -1698,7 +1698,7 @@ local function createDropdown(parent, label, options, callback, configKey)
         panel.Size = UDim2.new(0, absSize.X - 28, 0, panelHeight)
         panel.AutomaticSize = Enum.AutomaticSize.None
         panel.Position = UDim2.new(0, absPos.X + 14, 0, absPos.Y + absSize.Y + 6)
-        panel.BackgroundColor3 = C.graphite
+        panel.BackgroundColor3 = C.coal 
         panel.BackgroundTransparency = 1
         panel.BorderSizePixel = 0
         panel.ZIndex = 50
