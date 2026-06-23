@@ -1584,7 +1584,6 @@ local function createInput(parent, label, placeholder, callback, configKey)
 end
 
 local activeDropdown = nil
-
 local function createDropdown(parent, label, options, callback, configKey)
     local savedVal = configKey and Config[configKey]
     local selected = savedVal or {}
@@ -1592,6 +1591,7 @@ local function createDropdown(parent, label, options, callback, configKey)
 
     local isOpen = false
     local panel = nil
+    local inputConn = nil
 
     local row = Instance.new("Frame")
     row.Size = UDim2.new(1, 0, 0, 36)
@@ -1662,38 +1662,42 @@ local function createDropdown(parent, label, options, callback, configKey)
         if not panel then return end
         isOpen = false
         activeDropdown = nil
-        TweenService:Create(chevron, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        if inputConn then inputConn:Disconnect() inputConn = nil end
+
+        TweenService:Create(chevron, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
             Rotation = 0
         }):Play()
-        TweenService:Create(panel, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-            BackgroundTransparency = 1,
-            Size = UDim2.new(panel.Size.X.Scale, panel.Size.X.Offset, 0, panel.Size.Y.Offset * 0.85)
+        TweenService:Create(panel, TweenInfo.new(0.18, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            BackgroundTransparency = 1
         }):Play()
-        task.delay(0.2, function()
-            if panel then panel:Destroy() panel = nil end
+
+        local closing = panel
+        task.delay(0.18, function()
+            if closing then closing:Destroy() end
         end)
+        panel = nil
     end
 
     local function openDropdown()
-        if activeDropdown and activeDropdown ~= closeDropdown then
-            activeDropdown()
-        end
+        if activeDropdown then activeDropdown() end
         activeDropdown = closeDropdown
         isOpen = true
 
-        TweenService:Create(chevron, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        TweenService:Create(chevron, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
             Rotation = 180
         }):Play()
 
         local absPos = row.AbsolutePosition
         local absSize = row.AbsoluteSize
-        local itemHeight = 32
-        local panelHeight = #options * itemHeight + 8
+        local itemHeight = 34
+        local maxVisible = 5
+        local panelHeight = math.min(#options, maxVisible) * itemHeight + 8
 
         panel = Instance.new("Frame")
         panel.Name = "DropdownPanel"
-        panel.Size = UDim2.new(0, absSize.X - 28, 0, panelHeight * 0.85)
-        panel.Position = UDim2.new(0, absPos.X + 14, 0, absPos.Y + absSize.Y + 4)
+        panel.Size = UDim2.new(0, absSize.X - 28, 0, panelHeight)
+        panel.AutomaticSize = Enum.AutomaticSize.None
+        panel.Position = UDim2.new(0, absPos.X + 14, 0, absPos.Y + absSize.Y + 6)
         panel.BackgroundColor3 = C.graphite
         panel.BackgroundTransparency = 1
         panel.BorderSizePixel = 0
@@ -1702,38 +1706,46 @@ local function createDropdown(parent, label, options, callback, configKey)
         panel.Parent = screenGui
         Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 8)
 
-        local panelLayout = Instance.new("UIListLayout")
-        panelLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        panelLayout.Padding = UDim.new(0, 0)
-        panelLayout.Parent = panel
+        local scroll = Instance.new("ScrollingFrame")
+        scroll.Size = UDim2.new(1, 0, 1, 0)
+        scroll.BackgroundTransparency = 1
+        scroll.BorderSizePixel = 0
+        scroll.ScrollBarThickness = 0
+        scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        scroll.ScrollingDirection = Enum.ScrollingDirection.Y
+        scroll.ZIndex = 51
+        scroll.Parent = panel
 
         local panelPadding = Instance.new("UIPadding")
         panelPadding.PaddingTop = UDim.new(0, 4)
         panelPadding.PaddingBottom = UDim.new(0, 4)
-        panelPadding.Parent = panel
+        panelPadding.Parent = scroll
+
+        local panelLayout = Instance.new("UIListLayout")
+        panelLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        panelLayout.Padding = UDim.new(0, 0)
+        panelLayout.Parent = scroll
 
         for i, option in ipairs(options) do
             local isSelected = table.find(selected, option) ~= nil
 
-            local itemBtn = Instance.new("TextButton")
-            itemBtn.Name = "Item_" .. i
-            itemBtn.Size = UDim2.new(1, 0, 0, itemHeight)
-            itemBtn.BackgroundTransparency = 1
-            itemBtn.AutoButtonColor = false
-            itemBtn.Text = ""
-            itemBtn.LayoutOrder = i
-            itemBtn.ZIndex = 51
-            itemBtn.Parent = panel
+            local itemFrame = Instance.new("Frame")
+            itemFrame.Name = "Item_" .. i
+            itemFrame.Size = UDim2.new(1, 0, 0, itemHeight)
+            itemFrame.BackgroundTransparency = 1
+            itemFrame.LayoutOrder = i
+            itemFrame.ZIndex = 51
+            itemFrame.Parent = scroll
 
             local indicator = Instance.new("Frame")
-            indicator.Name = "Indicator"
             indicator.Size = UDim2.new(0, 2, 0, 14)
             indicator.Position = UDim2.new(0, 8, 0.5, -7)
             indicator.BackgroundColor3 = C.mauve
             indicator.BackgroundTransparency = isSelected and 0 or 1
             indicator.BorderSizePixel = 0
             indicator.ZIndex = 52
-            indicator.Parent = itemBtn
+            indicator.Parent = itemFrame
             Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
 
             local itemLabel = Instance.new("TextLabel")
@@ -1747,7 +1759,15 @@ local function createDropdown(parent, label, options, callback, configKey)
             itemLabel.TextXAlignment = Enum.TextXAlignment.Left
             itemLabel.TextYAlignment = Enum.TextYAlignment.Center
             itemLabel.ZIndex = 52
-            itemLabel.Parent = itemBtn
+            itemLabel.Parent = itemFrame
+
+            local itemBtn = Instance.new("TextButton")
+            itemBtn.Size = UDim2.new(1, 0, 1, 0)
+            itemBtn.BackgroundTransparency = 1
+            itemBtn.AutoButtonColor = false
+            itemBtn.Text = ""
+            itemBtn.ZIndex = 53
+            itemBtn.Parent = itemFrame
 
             itemBtn.MouseButton1Click:Connect(function()
                 local idx = table.find(selected, option)
@@ -1766,10 +1786,34 @@ local function createDropdown(parent, label, options, callback, configKey)
             end)
         end
 
-        TweenService:Create(panel, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-            BackgroundTransparency = 0.15,
-            Size = UDim2.new(0, absSize.X - 28, 0, panelHeight)
+        TweenService:Create(panel, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            BackgroundTransparency = 0.1
         }):Play()
+
+        task.wait()
+        inputConn = UserInputService.InputBegan:Connect(function(input, gpe)
+            if gpe then return end
+            if input.UserInputType ~= Enum.UserInputType.MouseButton1
+            and input.UserInputType ~= Enum.UserInputType.Touch then return end
+
+            local mp = UserInputService:GetMouseLocation()
+
+            if panel then
+                local pp = panel.AbsolutePosition
+                local ps = panel.AbsoluteSize
+                local inPanel = mp.X >= pp.X and mp.X <= pp.X + ps.X
+                    and mp.Y >= pp.Y and mp.Y <= pp.Y + ps.Y
+                if inPanel then return end
+            end
+
+            local rp = row.AbsolutePosition
+            local rs = row.AbsoluteSize
+            local inRow = mp.X >= rp.X and mp.X <= rp.X + rs.X
+                and mp.Y >= rp.Y and mp.Y <= rp.Y + rs.Y
+            if inRow then return end
+
+            closeDropdown()
+        end)
     end
 
     btn.MouseButton1Click:Connect(function()
@@ -1777,25 +1821,6 @@ local function createDropdown(parent, label, options, callback, configKey)
             closeDropdown()
         else
             openDropdown()
-        end
-    end)
-
-    -- close bila click luar
-    UserInputService.InputBegan:Connect(function(input)
-        if not isOpen then return end
-        if input.UserInputType ~= Enum.UserInputType.MouseButton1
-        and input.UserInputType ~= Enum.UserInputType.Touch then return end
-        local mp = UserInputService:GetMouseLocation()
-        if panel then
-            local pp = panel.AbsolutePosition
-            local ps = panel.AbsoluteSize
-            local rp = row.AbsolutePosition
-            local rs = row.AbsoluteSize
-            local inPanel = mp.X >= pp.X and mp.X <= pp.X + ps.X and mp.Y >= pp.Y and mp.Y <= pp.Y + ps.Y
-            local inRow = mp.X >= rp.X and mp.X <= rp.X + rs.X and mp.Y >= rp.Y and mp.Y <= rp.Y + rs.Y
-            if not inPanel and not inRow then
-                closeDropdown()
-            end
         end
     end)
 
@@ -1895,7 +1920,7 @@ local g2 = createGroup(tabContents["Player_Combat"], "Prediction", "right")
 createToggle(g2, "Enabled", false, function(state) print(state) end, "PredictionEnabled")
 createToggle(g2, "Auto Wall", false, function(state) print(state) end, "AutoWall")
 createInput(g2, "Username", "Enter name...", function(v) print(v) end, "PlayerName")
-createDropdown(g2, "Hit Part", {"Head", "Torso", "Arms", "Legs"}, function(v)
+createDropdown(g2, "Hit Part", {"Head", "Torso", "Arms", "Legs", "Dick","Muscle"}, function(v)
     print(table.concat(v, ", "))
 end, "AimbotParts")
 
