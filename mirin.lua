@@ -11,10 +11,14 @@ local c = {
     black = Color3.new(0, 0, 0),
     white = Color3.new(1, 1, 1),
     blue = Color3.fromRGB(147, 197, 253),
+    graphite = Color3.fromRGB(28, 28, 28),
+    steel = Color3.fromRGB(40, 40, 40),
+    grey = Color3.fromRGB(100, 100, 100),
+    ivory = Color3.fromRGB(255, 255, 240),
 }
 
 local heartbeat = RunService.Heartbeat
-local sqrt, sin, pi, halfpi, tau = math.sqrt, math.sin, math.pi, math.pi / 2, math.pi * 2
+local sqrt, sin, halfpi, tau = math.sqrt, math.sin, math.pi / 2, math.pi * 2
 local s, p = 1.70158, 0.3
 local e = 1 / p
 
@@ -100,79 +104,180 @@ function tween:pause() self.paused = true end
 function tween:resume() self.paused = false end
 function tween:cancel() self.cancelled = true end
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Mirin"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = gethui()
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "Mirin"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = gethui()
 
-local Window = Instance.new("Frame")
-Window.Name = "Window"
-Window.Size = UDim2.fromOffset(580, 560)
-Window.Position = UDim2.fromScale(0.5, 0.5)
-Window.AnchorPoint = Vector2.new(0.5, 0.5)
-Window.BackgroundColor3 = c.black
-Window.BackgroundTransparency = 1
-Window.BorderSizePixel = 0
-Window.Visible = false
-Window.Parent = ScreenGui
+local window = Instance.new("Frame")
+window.Name = "Window"
+window.Size = UDim2.fromOffset(580, 560)
+window.Position = UDim2.fromScale(0.5, 0.5)
+window.AnchorPoint = Vector2.new(0.5, 0.5)
+window.BackgroundColor3 = c.black
+window.BackgroundTransparency = 1
+window.BorderSizePixel = 0
+window.Active = true
+window.Visible = false
+window.Parent = screenGui
 
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 9)
-Corner.Parent = Window
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 9)
+corner.Parent = window
 
-local Stroke = Instance.new("UIStroke")
-Stroke.Color = c.coal
-Stroke.Thickness = 1.2
-Stroke.Transparency = 0.5
-Stroke.Parent = Window
+local stroke = Instance.new("UIStroke")
+stroke.Color = c.coal
+stroke.Thickness = 1.2
+stroke.Transparency = 0.5
+stroke.Parent = window
 
-local WindowScale = Instance.new("UIScale")
-WindowScale.Scale = 0.95
-WindowScale.Parent = Window
+local windowScale = Instance.new("UIScale")
+windowScale.Scale = 0.95
+windowScale.Parent = window
 
 local function launchWindow()
-    Window.Visible = true
-    WindowScale.Scale = 0.95
-    Window.BackgroundTransparency = 1
+    window.Visible = true
+    windowScale.Scale = 0.95
+    window.BackgroundTransparency = 1
 
-    tween:create(WindowScale, {time = 0.35, style = "quart", direction = "out"}, {
+    tween:create(windowScale, {time = 0.35, style = "quart", direction = "out"}, {
         Scale = 1
     }):play()
 
-    tween:create(Window, {time = 0.35, style = "quart", direction = "out"}, {
+    tween:create(window, {time = 0.35, style = "quart", direction = "out"}, {
         BackgroundTransparency = 0.01
     }):play()
 end
 
 launchWindow()
 
-local Title = Instance.new("TextLabel")
-Title.Name = "Title"
-Title.Text = "MIRIN"
-Title.Font = Enum.Font.BuilderSansBold
-Title.TextSize = 16
-Title.TextColor3 = c.white
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.fromOffset(80, 30)
-Title.Position = UDim2.fromOffset(12, 10)
-Title.Parent = Window
+local topbar = Instance.new("Frame")
+topbar.Name = "Topbar"
+topbar.Size = UDim2.new(1, 0, 0, 44)
+topbar.Position = UDim2.new(0, 0, 0, 0)
+topbar.BackgroundTransparency = 1
+topbar.BorderSizePixel = 0
+topbar.Parent = window
 
-local Gradient = Instance.new("UIGradient")
-Gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, c.white),
-    ColorSequenceKeypoint.new(1, c.blue),
-})
-Gradient.Rotation = 0
-Gradient.Parent = Title
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(0, 200, 0, 20)
+title.Position = UDim2.new(0, 12, 0.5, -10)
+title.BackgroundTransparency = 1
+title.Text = "Mirin"
+title.TextColor3 = c.white
+title.TextSize = 16
+title.Font = Enum.Font.BuilderSans
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = topbar
+
+local searchBar = Instance.new("Frame")
+searchBar.Name = "SearchBar"
+searchBar.Size = UDim2.new(0, 160, 0, 26)
+searchBar.Position = UDim2.new(1, -168, 0.5, -13)
+searchBar.BackgroundColor3 = c.graphite
+searchBar.BackgroundTransparency = 0.3
+searchBar.BorderSizePixel = 0
+searchBar.Parent = topbar
+Instance.new("UICorner", searchBar).CornerRadius = UDim.new(1, 0)
+
+local searchIcon = Instance.new("ImageLabel")
+searchIcon.Size = UDim2.new(0, 13, 0, 13)
+searchIcon.Position = UDim2.new(0, 9, 0.5, -6)
+searchIcon.BackgroundTransparency = 1
+searchIcon.Image = "rbxassetid://96045630034755"
+searchIcon.ImageColor3 = c.ivory
+searchIcon.Parent = searchBar
+
+local searchInput = Instance.new("TextBox")
+searchInput.Name = "Input"
+searchInput.Size = UDim2.new(1, -28, 1, 0)
+searchInput.Position = UDim2.new(0, 26, 0, 0)
+searchInput.BackgroundTransparency = 1
+searchInput.Text = ""
+searchInput.PlaceholderText = "Search..."
+searchInput.PlaceholderColor3 = c.grey
+searchInput.TextColor3 = c.white
+searchInput.TextSize = 12
+searchInput.Font = Enum.Font.BuilderSans
+searchInput.TextXAlignment = Enum.TextXAlignment.Left
+searchInput.ClearTextOnFocus = false
+searchInput.Parent = searchBar
+
+local searchHint = Instance.new("Frame")
+searchHint.Size = UDim2.new(0, 32, 0, 18)
+searchHint.Position = UDim2.new(1, -36, 0.5, -9)
+searchHint.BackgroundColor3 = c.steel
+searchHint.BackgroundTransparency = 0.5
+searchHint.BorderSizePixel = 0
+searchHint.Parent = searchBar
+Instance.new("UICorner", searchHint).CornerRadius = UDim.new(1, 0)
+
+local hintIcon = Instance.new("ImageLabel")
+hintIcon.Size = UDim2.new(0, 11, 0, 11)
+hintIcon.Position = UDim2.new(0, 6, 0.5, -5)
+hintIcon.BackgroundTransparency = 1
+hintIcon.Image = "rbxassetid://122538551810718"
+hintIcon.ImageColor3 = c.ivory
+hintIcon.Parent = searchHint
+
+local hintLabel = Instance.new("TextLabel")
+hintLabel.Size = UDim2.new(0, 14, 1, 0)
+hintLabel.Position = UDim2.new(0, 21, 0, 0)
+hintLabel.BackgroundTransparency = 1
+hintLabel.Text = "F"
+hintLabel.TextColor3 = c.ivory
+hintLabel.TextSize = 11
+hintLabel.Font = Enum.Font.BuilderSans
+hintLabel.TextXAlignment = Enum.TextXAlignment.Left
+hintLabel.Parent = searchHint
+
+local searchTooltip = Instance.new("Frame")
+searchTooltip.Size = UDim2.new(0, 58, 0, 22)
+searchTooltip.Position = UDim2.new(1, -62, 1, 6)
+searchTooltip.BackgroundColor3 = c.graphite
+searchTooltip.BackgroundTransparency = 0.1
+searchTooltip.BorderSizePixel = 0
+searchTooltip.Visible = false
+searchTooltip.ZIndex = 10
+searchTooltip.Parent = searchBar
+Instance.new("UICorner", searchTooltip).CornerRadius = UDim.new(1, 0)
+
+local tooltipText = Instance.new("TextLabel")
+tooltipText.Size = UDim2.new(1, 0, 1, 0)
+tooltipText.BackgroundTransparency = 1
+tooltipText.Text = "Ctrl + F"
+tooltipText.TextColor3 = c.white
+tooltipText.TextSize = 11
+tooltipText.Font = Enum.Font.BuilderSans
+tooltipText.ZIndex = 10
+tooltipText.Parent = searchTooltip
+
+searchHint.MouseEnter:Connect(function()
+    searchTooltip.Visible = true
+end)
+searchHint.MouseLeave:Connect(function()
+    searchTooltip.Visible = false
+end)
+                    
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.F and
+       (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
+       or UserInputService:IsKeyDown(Enum.KeyCode.RightControl)
+       or UserInputService:IsKeyDown(Enum.KeyCode.LeftSuper)) then
+        searchInput:CaptureFocus()
+    end
+end)
                     
 local dragging, dragStart, startPos, inputChanged, activeTween
 
-Window.InputBegan:Connect(function(input)
+window.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
     or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
-        startPos = Window.Position
+        startPos = window.Position
         inputChanged = input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -189,7 +294,7 @@ UserInputService.InputChanged:Connect(function(input)
         if dragging then
             local delta = input.Position - dragStart
             if activeTween then activeTween:cancel() end
-            activeTween = tween:create(Window, {time = 0.7, style = "quart", direction = "out"}, {
+            activeTween = tween:create(window, {time = 0.7, style = "quart", direction = "out"}, {
                 Position = UDim2.new(
                     startPos.X.Scale,
                     startPos.X.Offset + delta.X,
