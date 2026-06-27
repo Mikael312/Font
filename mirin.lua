@@ -9,6 +9,8 @@ local LocalPlayer = Players.LocalPlayer
 local c = {
     coal = Color3.fromRGB(18, 18, 18),
     black = Color3.new(0, 0, 0),
+    white = Color3.new(1, 1, 1),
+    blue = Color3.fromRGB(147, 197, 253),
 }
 
 local heartbeat = RunService.Heartbeat
@@ -144,6 +146,25 @@ end
 
 launchWindow()
 
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Text = "MIRIN"
+Title.Font = Enum.Font.BuilderSansBold
+Title.TextSize = 16
+Title.TextColor3 = c.white
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.fromOffset(80, 30)
+Title.Position = UDim2.fromOffset(12, 10)
+Title.Parent = Window
+
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, c.white),
+    ColorSequenceKeypoint.new(1, c.blue),
+})
+Gradient.Rotation = 0
+Gradient.Parent = Title
+                    
 local dragging, dragStart, startPos, inputChanged, activeTween
 
 Window.InputBegan:Connect(function(input)
