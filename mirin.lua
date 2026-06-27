@@ -315,12 +315,6 @@ tabBar.BorderSizePixel = 0
 tabBar.ClipsDescendants = true
 tabBar.Parent = window
 
-local tabList = Instance.new("UIListLayout")
-tabList.FillDirection = Enum.FillDirection.Horizontal
-tabList.SortOrder = Enum.SortOrder.LayoutOrder
-tabList.Padding = UDim.new(0, 4)
-tabList.Parent = tabBar
-
 local tabScroll = Instance.new("ScrollingFrame")
 tabScroll.Name = "TabScroll"
 tabScroll.Size = UDim2.new(1, 0, 1, 0)
@@ -350,9 +344,9 @@ local indicator = Instance.new("Frame")
 indicator.Name = "Indicator"
 indicator.Size = UDim2.new(0, 60, 1, 0)
 indicator.Position = UDim2.new(0, 0, 0, 0)
-indicator.BackgroundColor3 = c.steel
+indicator.BackgroundColor3 = c.coal
 indicator.BorderSizePixel = 0
-indicator.ZIndex = 0
+indicator.ZIndex = 2
 indicator.Parent = tabScroll
 Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
 
@@ -360,15 +354,22 @@ local tabs = {"Player", "Aimbot"}
 local tabButtons = {}
 local activeTab = nil
 
-local function selectTab(tab, button)
-    activeTab = tab
-    tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
-        Position = UDim2.new(0, button.AbsolutePosition.X - tabScroll.AbsolutePosition.X, 0, 0),
-        Size = UDim2.new(0, button.AbsoluteSize.X, 1, 0)
-    }):play()
-    for _, btn in tabButtons do
-        tween:create(btn, {time = 0.2, style = "quad", direction = "out"}, {
-            TextColor3 = btn == button and c.white or c.grey
+local function moveIndicator(btn)
+    task.spawn(function()
+        task.wait()
+        tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
+            Position = UDim2.new(0, btn.AbsolutePosition.X - tabScroll.AbsolutePosition.X, 0, 0),
+            Size = UDim2.new(0, btn.AbsoluteSize.X, 1, 0)
+        }):play()
+    end)
+end
+
+local function selectTab(name, btn)
+    activeTab = name
+    moveIndicator(btn)
+    for _, b in tabButtons do
+        tween:create(b, {time = 0.2, style = "quad", direction = "out"}, {
+            TextColor3 = b == btn and c.white or c.grey
         }):play()
     end
 end
@@ -386,7 +387,7 @@ for i, name in tabs do
     btn.Font = Enum.Font.BuilderSans
     btn.AutoButtonColor = false
     btn.LayoutOrder = i
-    btn.ZIndex = 1
+    btn.ZIndex = 3
     btn.Parent = tabInner
 
     local btnPad = Instance.new("UIPadding")
