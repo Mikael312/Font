@@ -1,6 +1,5 @@
 local cloneref = (cloneref or clonereference or function(instance) return instance end)
 local gethui = gethui or function() return game:GetService("CoreGui") end
-
 local Players = cloneref(game:GetService("Players"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local RunService = cloneref(game:GetService("RunService"))
@@ -16,6 +15,42 @@ local c = {
     grey = Color3.fromRGB(100, 100, 100),
     ivory = Color3.fromRGB(255, 255, 240),
 }
+
+local Maid = {}
+Maid.__index = Maid
+
+function Maid.new()
+    return setmetatable({ _tasks = {} }, Maid)
+end
+
+function Maid:GiveTask(task)
+    local class = typeof(task)
+    if class ~= "Instance" and class ~= "RBXScriptConnection" and (class ~= "table" or not task.Disconnect) then return end
+    self._tasks[task] = true
+end
+
+function Maid:RemoveTask(task)
+    self._tasks[task] = nil
+end
+
+function Maid:Destroy()
+    local task, _ = next(self._tasks)
+    while task do
+        self._tasks[task] = nil
+        if typeof(task) == "Instance" then
+            task:Destroy()
+        else
+            task:Disconnect()
+        end
+        task, _ = next(self._tasks)
+    end
+end
+
+Maid.DoCleaning = Maid.Destroy
+Maid.Disconnect = Maid.Destroy
+Maid.CleanUp = Maid.Destroy
+
+local maid = Maid.new()
 
 local heartbeat = RunService.Heartbeat
 local sqrt, sin, halfpi, tau = math.sqrt, math.sin, math.pi / 2, math.pi * 2
@@ -145,7 +180,7 @@ local function launchWindow()
     }):play()
 
     tween:create(window, {time = 0.35, style = "quart", direction = "out"}, {
-        BackgroundTransparency = 0.01
+        BackgroundTransparency = 0.02
     }):play()
 end
 
@@ -253,14 +288,15 @@ tooltipText.Font = Enum.Font.BuilderSans
 tooltipText.ZIndex = 10
 tooltipText.Parent = searchTooltip
 
-searchHint.MouseEnter:Connect(function()
+maid:GiveTask(searchHint.MouseEnter:Connect(function()
     searchTooltip.Visible = true
-end)
-searchHint.MouseLeave:Connect(function()
+end))
+
+maid:GiveTask(searchHint.MouseLeave:Connect(function()
     searchTooltip.Visible = false
-end)
-                    
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
+end))
+
+maid:GiveTask(UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.F and
        (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
@@ -268,11 +304,110 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
        or UserInputService:IsKeyDown(Enum.KeyCode.LeftSuper)) then
         searchInput:CaptureFocus()
     end
+end))
+
+local tabBar = Instance.new("Frame")
+tabBar.Name = "TabBar"
+tabBar.Size = UDim2.new(1, -24, 0, 32)
+tabBar.Position = UDim2.new(0, 12, 0, 44)
+tabBar.BackgroundTransparency = 1
+tabBar.BorderSizePixel = 0
+tabBar.ClipsDescendants = true
+tabBar.Parent = window
+
+local tabList = Instance.new("UIListLayout")
+tabList.FillDirection = Enum.FillDirection.Horizontal
+tabList.SortOrder = Enum.SortOrder.LayoutOrder
+tabList.Padding = UDim.new(0, 4)
+tabList.Parent = tabBar
+
+local tabScroll = Instance.new("ScrollingFrame")
+tabScroll.Name = "TabScroll"
+tabScroll.Size = UDim2.new(1, 0, 1, 0)
+tabScroll.BackgroundTransparency = 1
+tabScroll.BorderSizePixel = 0
+tabScroll.ScrollBarThickness = 0
+tabScroll.ScrollingDirection = Enum.ScrollingDirection.X
+tabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+tabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
+tabScroll.Parent = tabBar
+
+local tabInner = Instance.new("Frame")
+tabInner.Name = "TabInner"
+tabInner.Size = UDim2.new(1, 0, 1, 0)
+tabInner.BackgroundTransparency = 1
+tabInner.BorderSizePixel = 0
+tabInner.AutomaticSize = Enum.AutomaticSize.X
+tabInner.Parent = tabScroll
+
+local tabInnerList = Instance.new("UIListLayout")
+tabInnerList.FillDirection = Enum.FillDirection.Horizontal
+tabInnerList.SortOrder = Enum.SortOrder.LayoutOrder
+tabInnerList.Padding = UDim.new(0, 4)
+tabInnerList.Parent = tabInner
+
+local indicator = Instance.new("Frame")
+indicator.Name = "Indicator"
+indicator.Size = UDim2.new(0, 60, 1, 0)
+indicator.Position = UDim2.new(0, 0, 0, 0)
+indicator.BackgroundColor3 = c.steel
+indicator.BorderSizePixel = 0
+indicator.ZIndex = 0
+indicator.Parent = tabScroll
+Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
+
+local tabs = {"Player", "Aimbot"}
+local tabButtons = {}
+local activeTab = nil
+
+local function selectTab(tab, button)
+    activeTab = tab
+    tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
+        Position = UDim2.new(0, button.AbsolutePosition.X - tabScroll.AbsolutePosition.X, 0, 0),
+        Size = UDim2.new(0, button.AbsoluteSize.X, 1, 0)
+    }):play()
+    for _, btn in tabButtons do
+        tween:create(btn, {time = 0.2, style = "quad", direction = "out"}, {
+            TextColor3 = btn == button and c.white or c.grey
+        }):play()
+    end
+end
+
+for i, name in tabs do
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Size = UDim2.new(0, 0, 1, 0)
+    btn.AutomaticSize = Enum.AutomaticSize.X
+    btn.BackgroundTransparency = 1
+    btn.BorderSizePixel = 0
+    btn.Text = name
+    btn.TextColor3 = c.grey
+    btn.TextSize = 13
+    btn.Font = Enum.Font.BuilderSans
+    btn.AutoButtonColor = false
+    btn.LayoutOrder = i
+    btn.ZIndex = 1
+    btn.Parent = tabInner
+
+    local btnPad = Instance.new("UIPadding")
+    btnPad.PaddingLeft = UDim.new(0, 12)
+    btnPad.PaddingRight = UDim.new(0, 12)
+    btnPad.Parent = btn
+
+    tabButtons[i] = btn
+
+    maid:GiveTask(btn.MouseButton1Click:Connect(function()
+        selectTab(name, btn)
+    end))
+end
+
+task.defer(function()
+    selectTab(tabs[1], tabButtons[1])
 end)
                     
 local dragging, dragStart, startPos, inputChanged, activeTween
 
-window.InputBegan:Connect(function(input)
+maid:GiveTask(window.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
     or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
@@ -286,9 +421,9 @@ window.InputBegan:Connect(function(input)
             end
         end)
     end
-end)
+end))
 
-UserInputService.InputChanged:Connect(function(input)
+maid:GiveTask(UserInputService.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement
     or input.UserInputType == Enum.UserInputType.Touch then
         if dragging then
@@ -305,4 +440,4 @@ UserInputService.InputChanged:Connect(function(input)
             activeTween:play()
         end
     end
-end)
+end))
