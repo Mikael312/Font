@@ -4,8 +4,12 @@ local gethui = gethui or function() return game:GetService("CoreGui") end
 local Players = cloneref(game:GetService("Players"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local RunService = cloneref(game:GetService("RunService"))
-
 local LocalPlayer = Players.LocalPlayer
+
+local c = {
+    coal = Color3.fromRGB(18, 18, 18),
+    black = Color3.new(0, 0, 0),
+}
 
 local heartbeat = RunService.Heartbeat
 local sqrt, sin, pi, halfpi, tau = math.sqrt, math.sin, math.pi, math.pi / 2, math.pi * 2
@@ -101,16 +105,44 @@ ScreenGui.Parent = gethui()
 
 local Window = Instance.new("Frame")
 Window.Name = "Window"
-Window.Size = UDim2.fromOffset(620, 520)
+Window.Size = UDim2.fromOffset(580, 560)
 Window.Position = UDim2.fromScale(0.5, 0.5)
 Window.AnchorPoint = Vector2.new(0.5, 0.5)
-Window.BackgroundColor3 = Color3.new(0, 0, 0)
+Window.BackgroundColor3 = c.black
+Window.BackgroundTransparency = 1
 Window.BorderSizePixel = 0
+Window.Visible = false
 Window.Parent = ScreenGui
 
 local Corner = Instance.new("UICorner")
 Corner.CornerRadius = UDim.new(0, 9)
 Corner.Parent = Window
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = c.coal
+Stroke.Thickness = 1.2
+Stroke.Transparency = 0.5
+Stroke.Parent = Window
+
+local WindowScale = Instance.new("UIScale")
+WindowScale.Scale = 0.95
+WindowScale.Parent = Window
+
+local function launchWindow()
+    Window.Visible = true
+    WindowScale.Scale = 0.95
+    Window.BackgroundTransparency = 1
+
+    tween:create(WindowScale, {time = 0.35, style = "quart", direction = "out"}, {
+        Scale = 1
+    }):play()
+
+    tween:create(Window, {time = 0.35, style = "quart", direction = "out"}, {
+        BackgroundTransparency = 0.01
+    }):play()
+end
+
+launchWindow()
 
 local dragging, dragStart, startPos, inputChanged, activeTween
 
