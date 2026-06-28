@@ -317,11 +317,10 @@ end))
 
 local tabBar = Instance.new("Frame")
 tabBar.Name = "TabBar"
-tabBar.Size = UDim2.new(1, -24, 0, 32)
-tabBar.Position = UDim2.new(0, 12, 0, 52)
+tabBar.Size = UDim2.new(1, -24, 0, 40)
+tabBar.Position = UDim2.new(0, 4, 0, 52)
 tabBar.BackgroundTransparency = 1
 tabBar.BorderSizePixel = 0
-tabBar.ClipsDescendants = true
 tabBar.Parent = window
 
 local tabScroll = Instance.new("ScrollingFrame")
@@ -351,20 +350,13 @@ tabInnerList.Parent = tabInner
 
 local indicator = Instance.new("Frame")
 indicator.Name = "Indicator"
-indicator.Size = UDim2.new(0, 60, 0, 2)
+indicator.Size = UDim2.new(0, 40, 0, 2)
 indicator.Position = UDim2.new(0, 0, 1, -2)
 indicator.BackgroundColor3 = c.blue
 indicator.BorderSizePixel = 0
 indicator.ZIndex = 2
 indicator.Parent = tabScroll
 Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
-
-local indicatorGlow = Instance.new("UIStroke")
-indicatorGlow.Color = c.blue
-indicatorGlow.Thickness = 3
-indicatorGlow.Transparency = 0.5
-indicatorGlow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-indicatorGlow.Parent = indicator
 
 local tabs = {
     {name = "Player", icon = "rbxassetid://114518874508189"},
@@ -376,9 +368,12 @@ local activeTab = nil
 local function moveIndicator(btn)
     task.spawn(function()
         task.wait()
+        local btnLeft = btn.AbsolutePosition.X - tabScroll.AbsolutePosition.X
+        local btnWidth = btn.AbsoluteSize.X
+        local indicWidth = 36
         tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
-            Position = UDim2.new(0, btn.AbsolutePosition.X - tabScroll.AbsolutePosition.X, 1, -2),
-            Size = UDim2.new(0, btn.AbsoluteSize.X, 0, 2)
+            Position = UDim2.new(0, btnLeft + (btnWidth / 2) - (indicWidth / 2), 1, -2),
+            Size = UDim2.new(0, indicWidth, 0, 2)
         }):play()
     end)
 end
@@ -392,7 +387,7 @@ local function selectTab(name, btn)
         local isActive = b == btn
         if icon then
             tween:create(icon, {time = 0.2, style = "quad", direction = "out"}, {
-                ImageColor3 = isActive and c.white or c.grey
+                ImageColor3 = isActive and c.blue or c.grey
             }):play()
         end
         if label then
@@ -417,13 +412,13 @@ for i, tabData in tabs do
     btn.Parent = tabInner
 
     local btnPad = Instance.new("UIPadding")
-    btnPad.PaddingLeft = UDim.new(0, 12)
-    btnPad.PaddingRight = UDim.new(0, 12)
+    btnPad.PaddingLeft = UDim.new(0, 8)
+    btnPad.PaddingRight = UDim.new(0, 8)
     btnPad.Parent = btn
 
     local tabIcon = Instance.new("ImageLabel")
     tabIcon.Size = UDim2.new(0, 14, 0, 14)
-    tabIcon.Position = UDim2.new(0, 12, 0.5, -7)
+    tabIcon.Position = UDim2.new(0, 8, 0.5, -7)
     tabIcon.BackgroundTransparency = 1
     tabIcon.Image = tabData.icon
     tabIcon.ImageColor3 = c.grey
@@ -432,7 +427,7 @@ for i, tabData in tabs do
 
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, -30, 1, 0)
-    tabLabel.Position = UDim2.new(0, 28, 0, 0)
+    tabLabel.Position = UDim2.new(0, 26, 0, 0)
     tabLabel.BackgroundTransparency = 1
     tabLabel.Text = tabData.name
     tabLabel.TextColor3 = c.grey
