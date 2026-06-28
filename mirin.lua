@@ -348,39 +348,49 @@ tabInnerList.SortOrder = Enum.SortOrder.LayoutOrder
 tabInnerList.Padding = UDim.new(0, 4)
 tabInnerList.Parent = tabInner
 
+local indicWidth = 28
+
 local indicator = Instance.new("Frame")
 indicator.Name = "Indicator"
-indicator.Size = UDim2.new(0, 40, 0, 2)
-indicator.Position = UDim2.new(0, 0, 1, -2)
+indicator.Size = UDim2.new(0, indicWidth, 0, 2)
+indicator.Position = UDim2.new(0, 0, 1, -4)
 indicator.BackgroundColor3 = c.blue
 indicator.BorderSizePixel = 0
 indicator.ZIndex = 2
 indicator.Parent = tabScroll
-Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
 
 local tabs = {
     {name = "Player", icon = "rbxassetid://114518874508189"},
     {name = "Aimbot", icon = "rbxassetid://92899287223414"},
 }
 local tabButtons = {}
+local tabWidths = {}
 local activeTab = nil
 
-local function moveIndicator(btn)
-    task.spawn(function()
-        task.wait()
-        local btnLeft = btn.AbsolutePosition.X - tabScroll.AbsolutePosition.X
-        local btnWidth = btn.AbsoluteSize.X
-        local indicWidth = 28
-        tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
-            Position = UDim2.new(0, btnLeft + (btnWidth / 2) - (indicWidth / 2) + 4, 1, -2),
-            Size = UDim2.new(0, indicWidth, 0, 2)
-        }):play()
-    end)
+local function getTabX(targetName)
+    local x = 0
+    local padding = 4
+    for i, tabData in tabs do
+        local w = tabWidths[tabData.name] or 0
+        if tabData.name == targetName then
+            return x + w / 2 - indicWidth / 2 + 6
+        end
+        x = x + w + padding
+    end
+    return x
+end
+
+local function moveIndicator(targetName)
+    local x = getTabX(targetName)
+    tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
+        Position = UDim2.new(0, x, 1, -4),
+        Size = UDim2.new(0, indicWidth, 0, 2)
+    }):play()
 end
 
 local function selectTab(name, btn)
     activeTab = name
-    moveIndicator(btn)
+    moveIndicator(name)
     for _, b in tabButtons do
         local icon = b:FindFirstChildOfClass("ImageLabel")
         local label = b:FindFirstChildOfClass("TextLabel")
@@ -437,6 +447,11 @@ for i, tabData in tabs do
     tabLabel.ZIndex = 3
     tabLabel.Parent = btn
 
+    tabWidths[tabData.name] = 0
+    maid:GiveTask(btn:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+        tabWidths[tabData.name] = btn.AbsoluteSize.X
+    end))
+
     tabButtons[i] = btn
 
     maid:GiveTask(btn.MouseButton1Click:Connect(function()
@@ -445,6 +460,9 @@ for i, tabData in tabs do
 end
 
 task.defer(function()
+    for i, tabData in tabs do
+        tabWidths[tabData.name] = tabButtons[i].AbsoluteSize.X
+    end
     selectTab(tabs[1].name, tabButtons[1])
 end)
                     
