@@ -370,9 +370,9 @@ local function moveIndicator(btn)
         task.wait()
         local btnLeft = btn.AbsolutePosition.X - tabScroll.AbsolutePosition.X
         local btnWidth = btn.AbsoluteSize.X
-        local indicWidth = 36
+        local indicWidth = 28
         tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
-            Position = UDim2.new(0, btnLeft + (btnWidth / 2) - (indicWidth / 2), 1, -2),
+            Position = UDim2.new(0, btnLeft + (btnWidth / 2) - (indicWidth / 2) + 4, 1, -2),
             Size = UDim2.new(0, indicWidth, 0, 2)
         }):play()
     end)
