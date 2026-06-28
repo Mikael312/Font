@@ -348,7 +348,7 @@ tabInnerList.SortOrder = Enum.SortOrder.LayoutOrder
 tabInnerList.Padding = UDim.new(0, 4)
 tabInnerList.Parent = tabInner
 
-local indicWidth = 28
+local indicWidth = 29
 
 local indicator = Instance.new("Frame")
 indicator.Name = "Indicator"
