@@ -361,7 +361,7 @@ indicator.Parent = tabScroll
 
 local tabs = {
     {name = "Player", icon = "rbxassetid://114518874508189"},
-    {name = "Aimbot", icon = "rbxassetid://92899287223414"},
+    {name = "Aimbot", icon = "rbxassetid://136879043989014"},
 }
 local tabButtons = {}
 local tabWidths = {}
