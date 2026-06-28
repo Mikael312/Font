@@ -194,17 +194,26 @@ topbar.BackgroundTransparency = 1
 topbar.BorderSizePixel = 0
 topbar.Parent = window
 
-local title = Instance.new("TextLabel")
-title.Name = "Title"
-title.Size = UDim2.new(0, 200, 0, 20)
-title.Position = UDim2.new(0, 12, 0.5, -10)
-title.BackgroundTransparency = 1
-title.Text = "Mirin"
-title.TextColor3 = c.white
-title.TextSize = 16
-title.Font = Enum.Font.BuilderSans
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = topbar
+local avatar = Instance.new("ImageLabel")
+avatar.Name = "Avatar"
+avatar.Size = UDim2.new(0, 28, 0, 28)
+avatar.Position = UDim2.new(0, 12, 0.5, -14)
+avatar.BackgroundTransparency = 1
+avatar.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+avatar.Parent = topbar
+Instance.new("UICorner", avatar).CornerRadius = UDim.new(1, 0)
+
+local displayName = Instance.new("TextLabel")
+displayName.Name = "DisplayName"
+displayName.Size = UDim2.new(0, 150, 0, 20)
+displayName.Position = UDim2.new(0, 48, 0.5, -10)
+displayName.BackgroundTransparency = 1
+displayName.Text = LocalPlayer.DisplayName
+displayName.TextColor3 = c.white
+displayName.TextSize = 14
+displayName.Font = Enum.Font.BuilderSans
+displayName.TextXAlignment = Enum.TextXAlignment.Left
+displayName.Parent = topbar
 
 local searchBar = Instance.new("Frame")
 searchBar.Name = "SearchBar"
@@ -309,7 +318,7 @@ end))
 local tabBar = Instance.new("Frame")
 tabBar.Name = "TabBar"
 tabBar.Size = UDim2.new(1, -24, 0, 32)
-tabBar.Position = UDim2.new(0, 12, 0, 44)
+tabBar.Position = UDim2.new(0, 12, 0, 52)
 tabBar.BackgroundTransparency = 1
 tabBar.BorderSizePixel = 0
 tabBar.ClipsDescendants = true
