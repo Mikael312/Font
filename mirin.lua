@@ -351,15 +351,25 @@ tabInnerList.Parent = tabInner
 
 local indicator = Instance.new("Frame")
 indicator.Name = "Indicator"
-indicator.Size = UDim2.new(0, 60, 1, 0)
-indicator.Position = UDim2.new(0, 0, 0, 0)
-indicator.BackgroundColor3 = c.coal
+indicator.Size = UDim2.new(0, 60, 0, 2)
+indicator.Position = UDim2.new(0, 0, 1, -2)
+indicator.BackgroundColor3 = c.blue
 indicator.BorderSizePixel = 0
 indicator.ZIndex = 2
 indicator.Parent = tabScroll
 Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
 
-local tabs = {"Player", "Aimbot"}
+local indicatorGlow = Instance.new("UIStroke")
+indicatorGlow.Color = c.blue
+indicatorGlow.Thickness = 3
+indicatorGlow.Transparency = 0.5
+indicatorGlow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+indicatorGlow.Parent = indicator
+
+local tabs = {
+    {name = "Player", icon = "rbxassetid://114518874508189"},
+    {name = "Aimbot", icon = "rbxassetid://92899287223414"},
+}
 local tabButtons = {}
 local activeTab = nil
 
@@ -367,8 +377,8 @@ local function moveIndicator(btn)
     task.spawn(function()
         task.wait()
         tween:create(indicator, {time = 0.25, style = "quart", direction = "out"}, {
-            Position = UDim2.new(0, btn.AbsolutePosition.X - tabScroll.AbsolutePosition.X, 0, 0),
-            Size = UDim2.new(0, btn.AbsoluteSize.X, 1, 0)
+            Position = UDim2.new(0, btn.AbsolutePosition.X - tabScroll.AbsolutePosition.X, 1, -2),
+            Size = UDim2.new(0, btn.AbsoluteSize.X, 0, 2)
         }):play()
     end)
 end
@@ -377,23 +387,30 @@ local function selectTab(name, btn)
     activeTab = name
     moveIndicator(btn)
     for _, b in tabButtons do
-        tween:create(b, {time = 0.2, style = "quad", direction = "out"}, {
-            TextColor3 = b == btn and c.white or c.grey
-        }):play()
+        local icon = b:FindFirstChildOfClass("ImageLabel")
+        local label = b:FindFirstChildOfClass("TextLabel")
+        local isActive = b == btn
+        if icon then
+            tween:create(icon, {time = 0.2, style = "quad", direction = "out"}, {
+                ImageColor3 = isActive and c.white or c.grey
+            }):play()
+        end
+        if label then
+            tween:create(label, {time = 0.2, style = "quad", direction = "out"}, {
+                TextColor3 = isActive and c.white or c.grey
+            }):play()
+        end
     end
 end
 
-for i, name in tabs do
+for i, tabData in tabs do
     local btn = Instance.new("TextButton")
-    btn.Name = name
+    btn.Name = tabData.name
     btn.Size = UDim2.new(0, 0, 1, 0)
     btn.AutomaticSize = Enum.AutomaticSize.X
     btn.BackgroundTransparency = 1
     btn.BorderSizePixel = 0
-    btn.Text = name
-    btn.TextColor3 = c.grey
-    btn.TextSize = 13
-    btn.Font = Enum.Font.BuilderSans
+    btn.Text = ""
     btn.AutoButtonColor = false
     btn.LayoutOrder = i
     btn.ZIndex = 3
@@ -404,15 +421,36 @@ for i, name in tabs do
     btnPad.PaddingRight = UDim.new(0, 12)
     btnPad.Parent = btn
 
+    local tabIcon = Instance.new("ImageLabel")
+    tabIcon.Size = UDim2.new(0, 14, 0, 14)
+    tabIcon.Position = UDim2.new(0, 12, 0.5, -7)
+    tabIcon.BackgroundTransparency = 1
+    tabIcon.Image = tabData.icon
+    tabIcon.ImageColor3 = c.grey
+    tabIcon.ZIndex = 3
+    tabIcon.Parent = btn
+
+    local tabLabel = Instance.new("TextLabel")
+    tabLabel.Size = UDim2.new(1, -30, 1, 0)
+    tabLabel.Position = UDim2.new(0, 28, 0, 0)
+    tabLabel.BackgroundTransparency = 1
+    tabLabel.Text = tabData.name
+    tabLabel.TextColor3 = c.grey
+    tabLabel.TextSize = 13
+    tabLabel.Font = Enum.Font.BuilderSans
+    tabLabel.TextXAlignment = Enum.TextXAlignment.Left
+    tabLabel.ZIndex = 3
+    tabLabel.Parent = btn
+
     tabButtons[i] = btn
 
     maid:GiveTask(btn.MouseButton1Click:Connect(function()
-        selectTab(name, btn)
+        selectTab(tabData.name, btn)
     end))
 end
 
 task.defer(function()
-    selectTab(tabs[1], tabButtons[1])
+    selectTab(tabs[1].name, tabButtons[1])
 end)
                     
 local dragging, dragStart, startPos, inputChanged, activeTween
