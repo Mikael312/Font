@@ -373,7 +373,7 @@ local function getTabX(targetName)
     for i, tabData in tabs do
         local w = tabWidths[tabData.name] or 0
         if tabData.name == targetName then
-            return x + w / 2 - indicWidth / 2 + 6
+            return x + w / 2 - indicWidth / 2 + 5
         end
         x = x + w + padding
     end
