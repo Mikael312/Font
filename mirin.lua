@@ -203,6 +203,12 @@ avatar.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailT
 avatar.Parent = topbar
 Instance.new("UICorner", avatar).CornerRadius = UDim.new(1, 0)
 
+local avatarStroke = Instance.new("UIStroke")
+avatarStroke.Color = c.steel
+avatarStroke.Thickness = 1
+avatarStroke.Transparency = 0.3
+avatarStroke.Parent = avatar
+
 local displayName = Instance.new("TextLabel")
 displayName.Name = "DisplayName"
 displayName.Size = UDim2.new(0, 150, 0, 20)
@@ -359,9 +365,19 @@ indicator.BorderSizePixel = 0
 indicator.ZIndex = 2
 indicator.Parent = tabScroll
 
+local tabDivider = Instance.new("Frame")
+tabDivider.Name = "TabDivider"
+tabDivider.Size = UDim2.new(1, -24, 0, 1)
+tabDivider.Position = UDim2.new(0, 12, 0, 92)
+tabDivider.BackgroundColor3 = c.steel
+tabDivider.BackgroundTransparency = 0.6
+tabDivider.BorderSizePixel = 0
+tabDivider.Parent = window
+            
 local tabs = {
     {name = "Player", icon = "rbxassetid://128592429503220"},
     {name = "Aimbot", icon = "rbxassetid://73779289232957"},
+    {name = "Visual", icon = "rbxassetid://94273910202966"},
 }
 local tabButtons = {}
 local tabWidths = {}
