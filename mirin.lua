@@ -361,7 +361,7 @@ indicator.Parent = tabScroll
 
 local tabs = {
     {name = "Player", icon = "rbxassetid://128592429503220"},
-    {name = "Aimbot", icon = "rbxassetid://136879043989014"},
+    {name = "Aimbot", icon = "rbxassetid://73779289232957"},
 }
 local tabButtons = {}
 local tabWidths = {}
@@ -437,7 +437,7 @@ for i, tabData in tabs do
 
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, -30, 1, 0)
-    tabLabel.Position = UDim2.new(0, 26, 0, 0)
+    tabLabel.Position = UDim2.new(0, 26, 0, 1)
     tabLabel.BackgroundTransparency = 1
     tabLabel.Text = tabData.name
     tabLabel.TextColor3 = c.grey
