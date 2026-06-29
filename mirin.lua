@@ -360,7 +360,7 @@ indicator.ZIndex = 2
 indicator.Parent = tabScroll
 
 local tabs = {
-    {name = "Player", icon = "rbxassetid://114518874508189"},
+    {name = "Player", icon = "rbxassetid://128592429503220"},
     {name = "Aimbot", icon = "rbxassetid://136879043989014"},
 }
 local tabButtons = {}
